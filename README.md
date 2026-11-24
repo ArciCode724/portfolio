@@ -1,1 +1,1 @@
-# portfolio
+portfolio różnych projektów jakie zrobiłem

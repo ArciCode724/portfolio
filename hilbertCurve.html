@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pl">
+    <meta charset="UTF-8">
+    <style>
+    </style>
+    <script>
+        /**
+         * @typedef {Object} vec2d
+         * @property {number} x
+         * @property {number} y
+        */
+
+        // https://github.com/jakubcerveny/gilbert/tree/master
+        /**
+         * @param {number} idx - musi być mniejszy niż 2^order+1
+         * @param {number} order - okresla 2^n kwadraw 
+         * @return {vec2d}
+         */
+        function hilCurve_12(idx, width, height){
+            if (height > width) [height, width] = [width, height];
+            return hilCurve_12_recur(idx, width, height);
+        }
+
+        // +-------+
+        // |       |
+        // +---+---+
+        // |   |   |
+        // +---+---+
+
+        function evenSplit(x){
+            if(x == 2) return [1,1]
+            let half = x>>1
+            let x1 = half + ((half|x)&1)
+            return [x1, x-x1];
+        }
+
+        /**
+         * @param {number} idx - musi być mniejszy niż 2^order+1
+         * @param {number} order - okresla 2^n kwadraw 
+         * @return {vec2d}
+         */
+        function hilCurve_12_recur(idx, width, height) {
+            if(height == 1) return {x:idx, y:0}
+
+            const [w1, w2] = evenSplit(width);
+            const [h1, h2] = evenSplit(height);
+
+            if(2*width > 3*height){
+                const step2 =  w1*height;
+                if(idx >= step2){
+                    idx -= step2;
+                    let retVec = hilCurve_12_recur(idx, w2, height);
+                    retVec.x += w1;
+                    return retVec;
+                }else{
+                    return hilCurve_12_recur(idx, w1, height);
+                }
+            }else{
+                const step1 =  w1*h1;
+                const step3 =  width*height - (h1*w2); // (w1+w2)*(h1+h2) - (h1*w2);
+                const overStep1 = step1 <= idx;
+                const overStep3 = step3 <= idx;
+                if(overStep1 && !overStep3){
+                    idx -= step1;
+                    let retVec = hilCurve_12_recur(idx, width, h2);
+                    retVec.y += h1;
+                    return retVec;
+                }else{
+                    let retVec;
+                    if(overStep3){
+                        idx -= step3;
+                        retVec = hilCurve_12_recur(idx, h1, w2);
+                        retVec.x = h1 - 1 - retVec.x
+                        retVec.y = w2 - 1 - retVec.y
+                    }else{
+                        retVec = hilCurve_12_recur(idx, h1, w1);
+                    }
+                    retVec = {x:retVec.y, y:retVec.x}
+                    if(overStep3) retVec.x += w1;
+                    return retVec;
+                }
+            }
+        }
+
+        /**
+         * @param {number} idx - musi być mniejszy niż 2^order+1
+         * @param {number} order - okresla 2^n kwadraw 
+         * @return {vec2d}
+         */
+        function hilCurve_12_pow2(idx, order) {
+            if(order == 0) return {x:0, y:0}
+            /** @const {number} */
+            const n2 = 1<<(order-1);
+            const quadNum = Math.floor(idx/(n2*n2));
+            idx -= quadNum*n2*n2;
+
+            /** @type {vec2d} */
+            let vec = hilCurve_12_pow2(idx, order-1);
+            /** @type {bool} */
+            let rx = 1 < quadNum;
+            let ry = quadNum == 1 || quadNum == 2;
+
+            if(!ry){
+                if(rx){
+                    vec.x = n2-1-vec.x;
+                    vec.y = n2-1-vec.y;
+                }
+                vec = {x:vec.y, y:vec.x}
+            }
+
+            vec.x += n2*rx;
+            vec.y += n2*ry;
+            return vec;
+        }
+
+        /**
+         * @param {number} t
+         * @return {string}
+         */
+        function getColor(t) {
+            let r = Math.floor(255 * t);
+            let g = Math.floor(128 * (1-t));
+            let b = Math.floor(0 * t);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        /** @type {vec2d[]} */
+        let points = []
+        /** @type {number} */
+        const order = 6
+
+        function drawAll() {
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+            const boxSize = 10
+
+            const w = 54
+            const h = 40
+
+            // /** @type {vec2d[]} */
+            points = []
+            for (let i = 0; i < w*h; i++) {
+                let a = hilCurve_12(i,w,h)
+                a.x = a.x*boxSize + boxSize/2
+                a.y = a.y*boxSize + boxSize/2
+                points.push(a)
+            }
+
+            ctx.lineWidth = boxSize*0.5;
+            ctx.lineCap = "round";
+            // ctx.lineCap = "square";
+            // ctx.lineJoin = "round";
+            for (let i = 1; i < points.length; i++) {
+                ctx.beginPath();
+
+                const gradient = ctx.createLinearGradient(points[i-1].x, points[i-1].y, points[i].x, points[i].y);
+                gradient.addColorStop(0, getColor((i-1)/points.length));
+                gradient.addColorStop(1, getColor(i/points.length));
+                ctx.strokeStyle = gradient;
+                
+                ctx.moveTo(points[i-1].x, points[i-1].y);
+                ctx.lineTo(points[i].x, points[i].y);
+                ctx.stroke();
+            }
+        }
+        
+        function drawAnimeation() {
+            const canvas = document.getElementById("canvas");
+            // const boxSize = canvas.width/(1<<order)
+
+            // /** @type {vec2d[]} */
+            // points = []
+            // for (let i = 0; i < 1<<(2*order); i++) {
+            //     let a = hilCurve_12_pow2(i,order)
+            //     a.x = a.x*boxSize + boxSize/2
+            //     a.y = a.y*boxSize + boxSize/2
+            //     points.push(a)
+            // }
+
+            const boxSize = 10
+
+            const w = 64
+            const h = 64
+
+            // /** @type {vec2d[]} */
+            points = []
+            for (let i = 0; i < w*h; i++) {
+                let a = hilCurve_12(i,w,h)
+                a.x = a.x*boxSize + boxSize/2
+                a.y = a.y*boxSize + boxSize/2
+                points.push(a)
+            }
+
+            frame(1)
+        }
+
+        /**
+         * @param {number} frameI
+         */
+        function frame(frameI) {
+            if(frameI == points.length) return;
+            
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+            const boxSize = 10
+
+            ctx.lineWidth = boxSize*0.75;
+            // ctx.lineCap = "round";
+            ctx.lineCap = "square";
+            // ctx.lineJoin = "round";
+            ctx.beginPath();
+        
+            /** @type{vec2d} */
+            let p1 = points[frameI-1]
+            let p2 = points[frameI]
+
+            const gradient = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+            gradient.addColorStop(0, getColor((frameI-1)/points.length));
+            gradient.addColorStop(1, getColor(frameI/points.length));
+            ctx.strokeStyle = gradient;
+            
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+
+            setTimeout(frame, 100, frameI+1);
+        }
+
+        
+    </script>
+</head>
+<body>
+    <canvas id="canvas" width="3000" height="3000"></canvas>
+    <script>
+        // drawAll()
+        drawAnimeation()
+    </script>
+</body>
+
+
+<!-- <script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const points = [
+  [80, 300],
+  [180, 180],
+  [280, 240],
+  [390, 100],
+  [520, 170],
+  [650, 80],
+  [730, 140]
+];
+
+// Gradient across the whole path
+const gradient = ctx.createLinearGradient(80, 300, 730, 80);
+gradient.addColorStop(0, "#ff0080");
+gradient.addColorStop(0.5, "#7928ca");
+gradient.addColorStop(1, "#00d4ff");
+
+ctx.beginPath();
+
+ctx.moveTo(points[0][0], points[0][1]);
+
+for (let i = 1; i < points.length; i++) {
+  ctx.lineTo(points[i][0], points[i][1]);
+}
+
+ctx.strokeStyle = gradient;
+ctx.lineWidth = 12;
+ctx.lineCap = "round";
+ctx.lineJoin = "round";
+
+ctx.stroke();
+</script> -->

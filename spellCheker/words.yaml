@@ -1,0 +1,16 @@
+nodes:
+  boob: {}
+  book:
+    1: books
+    4: cake
+    8: zmieniło
+  books:
+    2: boon
+  boon:
+    1: boob
+    2: cook
+  cake:
+    1: cape
+    2: cart
+    3: na
+root: book
