@@ -1,0 +1,36 @@
+x_k = sum[i=0, n]( x_i * e^(JPI2 * k*i/n) )
+
+x_k = sum[i=0, n/2]( x_2i * e^(JPI2 * k*2*i/n) ) + sum[i=0, n/2]( x_(2i+1) * e^(JPI2 * k*(2*i+1)/n) )
+x_k = sum[i=0, n/2]( x_2i * e^(JPI2 * k*2*i/n) ) + sum[i=0, n/2]( x_(2i+1) * e^(JPI2 * 2*i*k/n + JPI2 * k/n) )
+x_k = sum[i=0, n/2]( x_2i * e^(JPI2 * k*2*i/n) ) + e^(JPI2*k/n)*sum[i=0, n/2]( x_(2i+1) * e^(JPI2 * 2*i*k/n) )
+
+x_(k + n/2) = sum[i=0, n/2]( x_2i * e^(JPI2 * (k + n/2)*2*i/n) ) + e^(JPI2 * (k + n/2)/n)*sum[i=0, n/2]( x_(2i+1) * e^(JPI2 * 2*i*(k + n/2)/n) )
+x_(k + n/2) = sum[i=0, n/2]( x_2i * e^(JPI2*k*2*i/n + JPI2*i ) ) + e^(JPI2*k/n + JPI2/2)*sum[i=0, n/2]( x_(2i+1) * e^(JPI2*2*i*k/n + JPI2*i) )
+x_(k + n/2) = sum[i=0, n/2]( x_2i * e^(JPI2*k*2*i/n) ) - e^(JPI2*k/n)*sum[i=0, n/2]( x_(2i+1) * e^(JPI2*2*i*k/n) )
+
+x_k         = sum[i=0, n/2]( x_2i * e^(JPI2*k*2*i/n) ) + e^(JPI2*k/n)*sum[i=0, n/2]( x_(2i+1) * e^(JPI2*2*i*k/n) )
+x_(k + n/2) = sum[i=0, n/2]( x_2i * e^(JPI2*k*2*i/n) ) - e^(JPI2*k/n)*sum[i=0, n/2]( x_(2i+1) * e^(JPI2*2*i*k/n) )
+
+x_(n-k) = sum[i=0, n]( x_i * e^(JPI2 * (n-k)*i/n) )
+x_(n-k) = sum[i=0, n]( x_i * e^( JPI2*i - JPI2*k*i/n ) )
+x_(n-k) = sum[i=0, n]( x_i * e^(-JPI2*k*i/n) )
+
+x_k     = sum[i=0, n]( x_i * e^( JPI2*k*i/n) )
+x_(n-k) = sum[i=0, n]( x_i * e^(-JPI2*k*i/n) )
+
+x_k = sum[i=0, n/3]( x_3i * e^(JPI2 * k*3*i/n) ) + sum[i=0, n/3]( x_(3i+1) * e^(JPI2 * k*(3*i+1)/n) ) + sum[i=0, n/3]( x_(3i+2) * e^(JPI2 * k*(3*i+2)/n) )
+x_k = sum[i=0, n/3]( x_3i * e^(JPI2 * k*3*i/n) ) + sum[i=0, n/3]( x_(3i+1) * e^(JPI2*k*3*i/n + JPI2*k/n) ) + sum[i=0, n/3]( x_(3i+2) * e^(JPI2*k*3*i/n + JPI2*k*2/n) )
+x_k = sum[i=0, n/3]( x_3i * e^(JPI2 * k*3*i/n) ) + e^(JPI2*k/n)*sum[i=0, n/3]( x_(3i+1) * e^(JPI2*k*3*i/n) ) + e^(JPI2*k*2/n)*sum[i=0, n/3]( x_(3i+2) * e^(JPI2*k*3*i/n) )
+
+
+x_k = sum[a=0; b]( e^(-JPI2*a*k/n)*sum[i=0, n/b]( x_(bi+a) * e^(-JPI2 * k*b*i/n) ) )
+
+x_(k + n/b) = sum[a=0; b]( e^(-JPI2*a*(k + n/b)/n)*sum[i=0, n/b]( x_(bi+a) * e^(-JPI2 * (k + n/b)*b*i/n) ) )
+x_(k + n/b) = sum[a=0; b]( e^(-JPI2*a*k/n - JPI2*a/b)*sum[i=0, n/b]( x_(bi+a) * e^(-JPI2*k*b*i/n) ) )
+
+x_k         = sum[a=0; b]( e^(-JPI2*a*k/n           )*sum[i=0, n/b]( x_(bi+a) * e^(-JPI2*k*b*i/n) ) )
+x_(k + n/b) = sum[a=0; b]( e^(-JPI2*a*k/n - JPI2*a/b)*sum[i=0, n/b]( x_(bi+a) * e^(-JPI2*k*b*i/n) ) )
+
+x_i = sum[k=0; n]( x_k * e^(JPI2*k*i/n) )
+x_i = sum[a=0; b]( sum[k=0; n/b]( x_(bk+a) * e^(JPI2*(bk+a)*i/n) ) )
+x_i = sum[a=0; b]( e^(JPI2*a*i/n) sum[k=0; n/b]( x_(bk+a) * e^(JPI2*b*k*i/n) ) )
